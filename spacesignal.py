@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from numpy import array
+from numpy import array, rot90
 
 
 @dataclass
@@ -18,3 +18,7 @@ class SpaceSignal:
         lst = [0 if char == '-' else 1 for char in seq]
         divided_list = [lst[i:i + list_len] for i in range(0, len(lst), list_len)]
         return array(divided_list)
+
+    def inverse_signal(self):
+        self.signal = rot90(self.signal)
+        return self
