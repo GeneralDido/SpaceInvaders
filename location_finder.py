@@ -34,8 +34,8 @@ class LocationFinder:
                                 radar.signal[0:i + 1, :edge_cols_left]])
                         edge_cols_left += 1
                 rows -= 1
-            invader.inverse_signal()
-            radar.inverse_signal()
+            invader.rotate_signal()
+            radar.rotate_signal()
         filtered_list = filter(lambda x: x[0] >= self.accuracy and x[1].size >= invader.signal.size/2, edge_list_left)
         return sorted(filtered_list, key=lambda k: k[0], reverse=True)
 
@@ -54,8 +54,8 @@ class LocationFinder:
                                 radar.signal[0:i + 1, radar.cols - edge_cols_right + 1:]])
                     edge_cols_right -= 1
                 rows -= 1
-            invader.inverse_signal()
-            radar.inverse_signal()
+            invader.rotate_signal()
+            radar.rotate_signal()
         filtered_list = filter(lambda x: x[0] >= self.accuracy and x[1].size >= invader.signal.size/2, edge_list_right)
         return sorted(filtered_list, key=lambda k: k[0], reverse=True)
 
@@ -83,16 +83,17 @@ class LocationFinder:
                             radar.signal[0:i + 1, j:j + invader.cols],
                             find_coordinates(inversion_num, j, radar.rows, radar.cols)])
                 rows_up -= 1
-            invader.inverse_signal()
-            radar.inverse_signal()
+            invader.rotate_signal()
+            radar.rotate_signal()
         filtered_list = filter(lambda x: x[0] >= self.accuracy and x[1].size >= invader.signal.size/2, edge_list_center)
         return sorted(filtered_list, key=lambda k: k[0], reverse=True)
 
     def find_all_cases(self, invader: SpaceSignal, radar: SpaceSignal, similarity: similarity_function) -> list:
 
-        edges_list = [self.central_locations(invader, radar, similarity),
-                      self.edges_left(invader, radar, similarity),
-                      self.edges_center(invader, radar, similarity),
-                      self.edges_right(invader, radar, similarity)
-                      ]
-        return edges_list
+        possible_locations = [
+            self.central_locations(invader, radar, similarity),
+            self.edges_left(invader, radar, similarity),
+            self.edges_center(invader, radar, similarity),
+            self.edges_right(invader, radar, similarity)
+        ]
+        return possible_locations

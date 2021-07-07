@@ -19,6 +19,6 @@ class SpaceSignal:
         divided_list = [lst[i:i + list_len] for i in range(0, len(lst), list_len)]
         return array(divided_list)
 
-    def inverse_signal(self):
+    def rotate_signal(self):
         self.signal = rot90(self.signal)
         return self

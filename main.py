@@ -8,9 +8,9 @@ invader_1 = TextInput('Invaders/AntInvader.txt')
 invader_2 = TextInput('Invaders/JellyInvader.txt')
 radar_input = TextInput('Radars/RadarSample.txt')
 
-ant = SpaceSignal(8, 11, invader_1.row_signal)
-jellyfish = SpaceSignal(8, 8, invader_2.row_signal)
-amazing_radar = SpaceSignal(50, 100, radar_input.row_signal)
+ant = SpaceSignal(invader_1.rows, invader_1.cols, invader_1.row_signal)
+jellyfish = SpaceSignal(invader_2.rows, invader_2.cols, invader_2.row_signal)
+amazing_radar = SpaceSignal(radar_input.rows, radar_input.cols, radar_input.row_signal)
 
 simple_similarity_fn = similarity_function.SimpleEquality()
 simple_location_finder = LocationFinder(0.75)
