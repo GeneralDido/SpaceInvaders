@@ -18,15 +18,14 @@ simple_location_finder = LocationFinder(0.75)
 better_similarity_fn = similarity_function.InvaderEquality()
 better_location_finder = LocationFinder(0.85)
 
-# find_ant = simple_location_finder.find_possible_locations(ant, amazing_radar, simple_similarity_fn)
-find_jelly = better_location_finder.find_all_cases(jellyfish, amazing_radar, simple_similarity_fn)
+find_ant = simple_location_finder.find_all_cases(ant, amazing_radar, simple_similarity_fn)
+find_jelly = better_location_finder.find_all_cases(jellyfish, amazing_radar, better_similarity_fn)
 
-# find_ant = simple_location_finder.find_all_cases(ant, amazing_radar, simple_similarity_fn)
-# print(find_ant)
+print(find_ant)
 print('----------------------------------------------------------------------')
 print(find_jelly)
 
-# TODO: 1. edge cases 2. write tests 3. write documentation 4. (possible) improve code 5. (possible) video
+# TODO: 1. write tests 2. write documentation 3. (possible) video
 """ 
 When testing, test for:
 - normal circumstances

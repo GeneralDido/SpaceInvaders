@@ -7,8 +7,7 @@ import similarity_function
 class LocationFinder:
     accuracy: float
 
-    def central_locations(self, invader: SpaceSignal, radar: SpaceSignal,
-                          similarity: similarity_function) -> list:
+    def central_locations(self, invader: SpaceSignal, radar: SpaceSignal, similarity: similarity_function) -> list:
         equality_lst = []
         for i in range(0, radar.rows - invader.rows + 1):
             for j in range(0, radar.cols - invader.cols + 1):
@@ -32,8 +31,7 @@ class LocationFinder:
                             [similarity.similarity_comparison(
                                 invader.signal[rows - 1:invader.rows, -edge_cols_left:],
                                 radar.signal[0:i + 1, :edge_cols_left]),
-                                radar.signal[0:i + 1, :edge_cols_left],
-                                invader.signal[rows - 1:invader.rows, -edge_cols_left:]])
+                                radar.signal[0:i + 1, :edge_cols_left]])
                         edge_cols_left += 1
                 rows -= 1
             invader.inverse_signal()
@@ -53,8 +51,7 @@ class LocationFinder:
                             [similarity.similarity_comparison(
                                 invader.signal[rows - 1:invader.rows, :edge_cols_right - 1],
                                 radar.signal[0:i + 1, radar.cols - edge_cols_right + 1:]),
-                                radar.signal[0:i + 1, radar.cols - edge_cols_right + 1:],
-                                invader.signal[rows - 1:invader.rows, :edge_cols_right - 1]])
+                                radar.signal[0:i + 1, radar.cols - edge_cols_right + 1:]])
                     edge_cols_right -= 1
                 rows -= 1
             invader.inverse_signal()
@@ -63,8 +60,19 @@ class LocationFinder:
         return sorted(filtered_list, key=lambda k: k[0], reverse=True)
 
     def edges_center(self, invader: SpaceSignal, radar: SpaceSignal, similarity: similarity_function) -> list:
+
+        def find_coordinates(num_inversions: int, coordinate: int, radar_rows: int, radar_cols: int) -> (int, int):
+            if num_inversions == 0:
+                return 0, coordinate
+            elif num_inversions == 1:
+                return coordinate, radar_cols
+            elif num_inversions == 2:
+                return radar_rows, abs(radar_cols - coordinate)
+            else:
+                return coordinate, 0
+
         edge_list_center = []
-        for _ in range(4):
+        for inversion_num in range(4):
             rows_up = invader.rows
             for i in range(0, invader.rows - 1):
                 for j in range(0, radar.cols - invader.cols + 1):
@@ -73,7 +81,7 @@ class LocationFinder:
                             invader.signal[rows_up - 1:invader.rows, :],
                             radar.signal[0:i + 1, j:j + invader.cols]),
                             radar.signal[0:i + 1, j:j + invader.cols],
-                            invader.signal[rows_up - 1:invader.rows, :]])
+                            find_coordinates(inversion_num, j, radar.rows, radar.cols)])
                 rows_up -= 1
             invader.inverse_signal()
             radar.inverse_signal()
@@ -82,8 +90,7 @@ class LocationFinder:
 
     def find_all_cases(self, invader: SpaceSignal, radar: SpaceSignal, similarity: similarity_function) -> list:
 
-        edges_list = [
-            # self.central_locations(invader, radar, similarity),
+        edges_list = [self.central_locations(invader, radar, similarity),
                       self.edges_left(invader, radar, similarity),
                       self.edges_center(invader, radar, similarity),
                       self.edges_right(invader, radar, similarity)

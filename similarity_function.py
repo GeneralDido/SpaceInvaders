@@ -12,15 +12,15 @@ class SimilarityFunction(ABC):
 
 class SimpleEquality(SimilarityFunction):
     def similarity_comparison(self, invader_signal: array, radar_signal: array) -> float:
-        return sum(invader_signal == radar_signal) / invader_signal.size
+        return round(sum(invader_signal == radar_signal) / invader_signal.size, 3)
 
 
 class InvaderEquality(SimilarityFunction):
     def similarity_comparison(self, invader_signal: array, radar_signal: array) -> float:
         """ formula: bothAB / sumA """
         total = 0
-        for i in range(invader_signal.shape[0]):
-            for j in range(invader_signal.shape[1]):
+        for i in range(radar_signal.shape[0]):
+            for j in range(radar_signal.shape[1]):
                 if invader_signal[i][j] > 0 and invader_signal[i][j] == radar_signal[i][j]:
                     total += 1
-        return total / invader_signal.sum()
+        return round(total / invader_signal.sum(), 3) if total != 0 else 0.0
