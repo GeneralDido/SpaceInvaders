@@ -1,99 +1,86 @@
-from dataclasses import dataclass
 from spacesignal import SpaceSignal
-import similarity_function
+from similarity_function import SimilarityFunction
 
 
-@dataclass
 class LocationFinder:
+    """ LocationFinder calculates possible locations using signals from a space invader and the radar,
+    a similarity function and an expected accuracy score."""
+
+    invader: SpaceSignal
+    radar: SpaceSignal
+    similarity: SimilarityFunction
     accuracy: float
 
-    def central_locations(self, invader: SpaceSignal, radar: SpaceSignal, similarity: similarity_function) -> list:
+    def __init__(self, invader: SpaceSignal, radar: SpaceSignal, similarity: SimilarityFunction, accuracy: float):
+        if invader.signal.size > radar.signal.size:
+            raise ValueError(f"Invader signal array should be the same size or smaller than the radar signal array.")
+        else:
+            self.invader = invader
+            self.radar = radar
+        self.similarity = similarity
+        if accuracy <= 0.0 or accuracy > 1.0:
+            raise ValueError(f"accuracy should be between 0.0 and 1.0 but received {accuracy} instead.")
+        else:
+            self.accuracy = accuracy
+
+    @staticmethod
+    def find_coordinates(num_inversions: int, coordinate: int, radar_rows: int,
+                         radar_cols: int, invader_cols: int) -> (int, int):
+        """ Develops the right coordinates when rotating the invader and radar arrays by 90 degrees each time."""
+
+        if num_inversions == 0:
+            return 0, coordinate
+        elif num_inversions == 1:
+            return coordinate, radar_cols - 1
+        elif num_inversions == 2:
+            return radar_rows - 1, abs(radar_cols - coordinate - invader_cols)
+        else:
+            return coordinate, 0
+
+    def central_locations(self) -> list:
+        """ Finds possible locations with the full invader array, while traversing the radar array. """
+
         equality_lst = []
-        for i in range(0, radar.rows - invader.rows + 1):
-            for j in range(0, radar.cols - invader.cols + 1):
+        for i in range(0, self.radar.rows - self.invader.rows + 1):
+            for j in range(0, self.radar.cols - self.invader.cols + 1):
                 equality_lst.append(
-                    [similarity.similarity_comparison(
-                        invader.signal,
-                        radar.signal[i:i + invader.rows, j:j + invader.cols]),
-                        radar.signal[i:i + invader.rows, j:j + invader.cols], i, j])
+                    [self.similarity.similarity_comparison(
+                        self.invader.signal,
+                        self.radar.signal[i:i + self.invader.rows, j:j + self.invader.cols]),
+                        self.radar.signal[i:i + self.invader.rows, j:j + self.invader.cols], i, j])
         filtered_list = filter(lambda x: x[0] >= self.accuracy, equality_lst)
         return sorted(filtered_list, key=lambda k: k[0], reverse=True)
 
-    def edges_left(self, invader: SpaceSignal, radar: SpaceSignal, similarity: similarity_function) -> list:
-        edge_list_left = []
-        for _ in range(4):
-            rows = invader.rows
-            for i in range(0, invader.rows - 1):
-                edge_cols_left = 1
-                for _ in range(0, invader.cols - 1):
-                    if edge_cols_left <= invader.cols:
-                        edge_list_left.append(
-                            [similarity.similarity_comparison(
-                                invader.signal[rows - 1:invader.rows, -edge_cols_left:],
-                                radar.signal[0:i + 1, :edge_cols_left]),
-                                radar.signal[0:i + 1, :edge_cols_left]])
-                        edge_cols_left += 1
-                rows -= 1
-            invader.rotate_signal()
-            radar.rotate_signal()
-        filtered_list = filter(lambda x: x[0] >= self.accuracy and x[1].size >= invader.signal.size/2, edge_list_left)
-        return sorted(filtered_list, key=lambda k: k[0], reverse=True)
+    def edges(self) -> list:
+        """Traverses the edges of the radar array, starting from col 1 up to col n-1.
+        Inserts new invader array rows in each iteration up to n-1 invader rows.
+         We do this 4 times, each time rotating the two matrices by 90 degrees. """
 
-    def edges_right(self, invader: SpaceSignal, radar: SpaceSignal, similarity: similarity_function) -> list:
-        edge_list_right = []
-        for _ in range(4):
-            rows = invader.rows
-            for i in range(0, invader.rows - 1):
-                edge_cols_right = invader.cols
-                for _ in range(0, invader.cols - 1):
-                    if edge_cols_right > 0:
-                        edge_list_right.append(
-                            [similarity.similarity_comparison(
-                                invader.signal[rows - 1:invader.rows, :edge_cols_right - 1],
-                                radar.signal[0:i + 1, radar.cols - edge_cols_right + 1:]),
-                                radar.signal[0:i + 1, radar.cols - edge_cols_right + 1:]])
-                    edge_cols_right -= 1
-                rows -= 1
-            invader.rotate_signal()
-            radar.rotate_signal()
-        filtered_list = filter(lambda x: x[0] >= self.accuracy and x[1].size >= invader.signal.size/2, edge_list_right)
-        return sorted(filtered_list, key=lambda k: k[0], reverse=True)
-
-    def edges_center(self, invader: SpaceSignal, radar: SpaceSignal, similarity: similarity_function) -> list:
-
-        def find_coordinates(num_inversions: int, coordinate: int, radar_rows: int, radar_cols: int) -> (int, int):
-            if num_inversions == 0:
-                return 0, coordinate
-            elif num_inversions == 1:
-                return coordinate, radar_cols
-            elif num_inversions == 2:
-                return radar_rows, abs(radar_cols - coordinate)
-            else:
-                return coordinate, 0
-
-        edge_list_center = []
+        edge_list = []
         for inversion_num in range(4):
-            rows_up = invader.rows
-            for i in range(0, invader.rows - 1):
-                for j in range(0, radar.cols - invader.cols + 1):
-                    edge_list_center.append(
-                        [similarity.similarity_comparison(
-                            invader.signal[rows_up - 1:invader.rows, :],
-                            radar.signal[0:i + 1, j:j + invader.cols]),
-                            radar.signal[0:i + 1, j:j + invader.cols],
-                            find_coordinates(inversion_num, j, radar.rows, radar.cols)])
-                rows_up -= 1
-            invader.rotate_signal()
-            radar.rotate_signal()
-        filtered_list = filter(lambda x: x[0] >= self.accuracy and x[1].size >= invader.signal.size/2, edge_list_center)
+            rows = self.invader.rows
+            for i in range(0, self.invader.rows - 1):
+                for j in range(0, self.radar.cols - self.invader.cols + 1):
+                    coordinates = self.find_coordinates(inversion_num, j, self.radar.rows, self.radar.cols, self.invader.cols)
+                    edge_list.append(
+                        [self.similarity.similarity_comparison(
+                            self.invader.signal[rows - 1:self.invader.rows, :],
+                            self.radar.signal[0:i + 1, j:j + self.invader.cols]),
+                            self.radar.signal[0:i + 1, j:j + self.invader.cols],
+                            coordinates[0],
+                            coordinates[1]
+                            ])
+                rows -= 1
+            self.invader.rotate_signal()
+            self.radar.rotate_signal()
+        filtered_list = filter(lambda x: x[0] >= self.accuracy and x[1].size >= self.invader.signal.size/2, edge_list)
         return sorted(filtered_list, key=lambda k: k[0], reverse=True)
 
-    def find_all_cases(self, invader: SpaceSignal, radar: SpaceSignal, similarity: similarity_function) -> list:
+    def find_possible_locations(self) -> list:
+        """ Returns possible locations in a list of lists. """
 
         possible_locations = [
-            self.central_locations(invader, radar, similarity),
-            self.edges_left(invader, radar, similarity),
-            self.edges_center(invader, radar, similarity),
-            self.edges_right(invader, radar, similarity)
+            self.central_locations(),
+            self.edges()
         ]
         return possible_locations

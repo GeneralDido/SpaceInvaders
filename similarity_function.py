@@ -3,21 +3,23 @@ from abc import ABC, abstractmethod
 
 
 class SimilarityFunction(ABC):
-    """Other formulas for distances: https://docs.eyesopen.com/toolkits/python/graphsimtk/measure.html"""
+    """ Functions to return a possible score from 0.0 to 1.0
+    Other formulas for distances: https://docs.eyesopen.com/toolkits/python/graphsimtk/measure.html"""
 
     @abstractmethod
     def similarity_comparison(self, invader_signal: array, radar_signal: array) -> float:
-        pass
+        raise NotImplementedError
 
 
 class SimpleEquality(SimilarityFunction):
+    """ Checks how many elements in the same location of two arrays are the same and gets a score"""
     def similarity_comparison(self, invader_signal: array, radar_signal: array) -> float:
         return round(sum(invader_signal == radar_signal) / invader_signal.size, 3)
 
 
 class InvaderEquality(SimilarityFunction):
     def similarity_comparison(self, invader_signal: array, radar_signal: array) -> float:
-        """ formula: bothAB / sumA """
+        """ Checks how many times both arrays have a "1" in the same location of the array. formula: bothAB / sumA """
         total = 0
         for i in range(radar_signal.shape[0]):
             for j in range(radar_signal.shape[1]):
