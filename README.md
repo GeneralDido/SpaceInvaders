@@ -106,7 +106,7 @@ The array is a numpy array containing the possible location. (13,60) are the pos
 
 For this project I developed 3 main classes, and a helper class. 
 
-### TextInput 
+## TextInput 
 
 This is a helper class to get the signal as well as rows and cols from a text file. 
 
@@ -114,7 +114,7 @@ In a hypothetical scenario where we would like to add another input method, we c
 
 As a result, we have a helper class that is separate from other classes, has one purpose, is extendable and does not intervene in any way with the main classes.
 
-### SpaceSignal
+## SpaceSignal
 
 This class represents a space signal, which can be representated by a numpy array, as well as rows and columns of the array for convenience.
 
@@ -122,7 +122,7 @@ Although we could have made different classes for SpaceInvaders and Radar, both 
 
 In a scenario where something was to change in SpaceInvaders or Aliens, we can easily develop separate classes that inherit from the main class.
 
-#### Methods
+### Methods
 
 ```python 
 def make_array(seq: str, list_len: int) → numpy.array
@@ -131,11 +131,11 @@ def make_array(seq: str, list_len: int) → numpy.array
 This is a static method to be used in the initialization. There, we develop a numpy array from the row string input from TextInput.
 
 
-### SimilarityFunction (Abstract Class)
+## SimilarityFunction (Abstract Class)
 
 This is an abstract class to develop classes that compare two signals, i.e. two numpy arrays.
 
-#### Methods
+### Methods
 ```python
 def similarity_comparison(self, invader_signal: numpy.array, radar_signal: numpy.array) -> float
 ```
@@ -155,7 +155,7 @@ class InvaderEquality(SimilarityFunction)
 """Checks how many times both arrays have a "1" in the same location of the array. formula: bothAB / sumA"""
 ```
 
-### LocationFinder
+## LocationFinder
 
 The LocationFinder class finds the possible locations of the invaders and returns them in a list of lists. 
 
@@ -166,7 +166,7 @@ As such, we can develop different LocationFinders with different projected accur
 
 The object gets an invader signal, a radar signal, and a similarity function and returns a list of locations based on the accuracy score.
 
-#### Methods
+### Methods
 
 ```python
 def central_locations(self) -> list 
@@ -199,7 +199,7 @@ def correct_coordinates(num_inversions: int, coordinate: int, radar_rows: int,
  """ Develops the right coordinates when rotating the invader and radar arrays by 90 degrees each time."""
 ```
 
-### Example
+## Example
 
 *main.py* provides an example usage. 
 
