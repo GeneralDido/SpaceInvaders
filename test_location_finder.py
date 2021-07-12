@@ -35,7 +35,7 @@ class TestLocationFinder(unittest.TestCase):
 
         self.assertEqual(find_location, [[], []])
 
-    def test_edges_center(self):
+    def test_edges(self):
         similarity_fn = SimpleEquality()
         invader_input = TextInput('tests/Invaders/Invader2x2.txt')
         invader = SpaceSignal(invader_input.rows, invader_input.cols, invader_input.row_signal)
