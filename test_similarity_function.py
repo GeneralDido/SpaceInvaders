@@ -16,4 +16,5 @@ class TestSimilarityFunction(unittest.TestCase):
         self.assertEqual(invader_equality.similarity_comparison(array([[0, 1], [1, 0]]), array([[1, 1], [1, 0]])), 1.0)
 
 
-unittest.main()
+if __name__ == '__main__':
+    unittest.main()

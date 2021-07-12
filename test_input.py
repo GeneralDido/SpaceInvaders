@@ -15,4 +15,5 @@ class TestTextInput(unittest.TestCase):
         self.assertEqual(row_signal, '-o--o-')
 
 
-unittest.main()
+if __name__ == '__main__':
+    unittest.main()

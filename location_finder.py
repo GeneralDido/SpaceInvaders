@@ -1,6 +1,6 @@
 from spacesignal import SpaceSignal
 from similarity_function import SimilarityFunction
-
+from numpy import array, rot90
 
 class LocationFinder:
     """ LocationFinder calculates possible locations using signals from a space invader and the radar,
@@ -24,8 +24,8 @@ class LocationFinder:
             self.accuracy = accuracy
 
     @staticmethod
-    def find_coordinates(num_inversions: int, coordinate: int, radar_rows: int,
-                         radar_cols: int, invader_cols: int) -> (int, int):
+    def correct_coordinates(num_inversions: int, coordinate: int, radar_rows: int,
+                            radar_cols: int, invader_cols: int) -> (int, int):
         """ Develops the right coordinates when rotating the invader and radar arrays by 90 degrees each time."""
 
         if num_inversions == 0:
@@ -36,6 +36,14 @@ class LocationFinder:
             return radar_rows - 1, abs(radar_cols - coordinate - invader_cols)
         else:
             return coordinate, 0
+
+    @staticmethod
+    def rotate_signal(signal: array, num_rotations):
+        """ Rotates signal n times, n: number of current rotations """
+
+        for _ in range(num_rotations):
+            signal = rot90(signal)
+        return signal
 
     def central_locations(self) -> list:
         """ Finds possible locations with the full invader array, while traversing the radar array. """
@@ -54,25 +62,26 @@ class LocationFinder:
     def edges(self) -> list:
         """Traverses the edges of the radar array, starting from col 1 up to col n-1.
         Inserts new invader array rows in each iteration up to n-1 invader rows.
-         We do this 4 times, each time rotating the two matrices by 90 degrees. """
+         We do this 4 times, each time rotating the two matrices by 90 degrees.
+         Coordinates of returned radar signal start from the edge."""
 
         edge_list = []
-        for inversion_num in range(4):
+        for num_rotations in range(4):
             rows = self.invader.rows
             for i in range(0, self.invader.rows - 1):
                 for j in range(0, self.radar.cols - self.invader.cols + 1):
-                    coordinates = self.find_coordinates(inversion_num, j, self.radar.rows, self.radar.cols, self.invader.cols)
+                    coordinates = self.correct_coordinates(num_rotations, j, self.radar.rows, self.radar.cols, self.invader.cols)
+                    rotated_signal = self.rotate_signal(self.radar.signal[0:i + 1, j:j + self.invader.cols], 4 - num_rotations)
                     edge_list.append(
                         [self.similarity.similarity_comparison(
                             self.invader.signal[rows - 1:self.invader.rows, :],
                             self.radar.signal[0:i + 1, j:j + self.invader.cols]),
-                            self.radar.signal[0:i + 1, j:j + self.invader.cols],
+                            rotated_signal,
                             coordinates[0],
-                            coordinates[1]
-                            ])
+                            coordinates[1]])
                 rows -= 1
-            self.invader.rotate_signal()
-            self.radar.rotate_signal()
+            self.invader.signal = self.rotate_signal(self.invader.signal, 1)
+            self.radar.signal = self.rotate_signal(self.radar.signal, 1)
         filtered_list = filter(lambda x: x[0] >= self.accuracy and x[1].size >= self.invader.signal.size/2, edge_list)
         return sorted(filtered_list, key=lambda k: k[0], reverse=True)
 

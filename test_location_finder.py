@@ -50,7 +50,7 @@ class TestLocationFinder(unittest.TestCase):
         self.assertEqual(find_central_locations[0][3], 1)
 
         self.assertEqual(find_central_locations[1][0], 1)
-        np.testing.assert_array_equal(find_central_locations[1][1], np.array([[1, 1]]))
+        np.testing.assert_array_equal(find_central_locations[1][1], np.array([[1], [1]]))
         self.assertEqual(find_central_locations[1][2], 1)
         self.assertEqual(find_central_locations[1][3], 3)
 
@@ -60,9 +60,10 @@ class TestLocationFinder(unittest.TestCase):
         self.assertEqual(find_central_locations[2][3], 1)
 
         self.assertEqual(find_central_locations[3][0], 1)
-        np.testing.assert_array_equal(find_central_locations[3][1], np.array([[1, 1]]))
+        np.testing.assert_array_equal(find_central_locations[3][1], np.array([[1], [1]]))
         self.assertEqual(find_central_locations[3][2], 1)
         self.assertEqual(find_central_locations[3][3], 0)
 
 
-unittest.main()
+if __name__ == '__main__':
+    unittest.main()
